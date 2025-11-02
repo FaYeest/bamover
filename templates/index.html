@@ -13,92 +13,427 @@
             box-sizing: border-box;
         }
 
+        /* Theme variables (light default values) */
+        :root {
+            --bg: #f0f4f8;
+            --card-bg: #ffffff;
+            --text: #111827;
+            --muted: #6b7280;
+            --accent: #4CAF50;
+            --input-bg: #e8f0fe;
+            --input-border: #90caf9;
+            --shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Dark theme overrides */
+        [data-theme="dark"] {
+            --bg: #0b1220;
+            --card-bg: #0f1724;
+            --text: #e6eef8;
+            --muted: #9aa6b2;
+            --accent: #34d399;
+            --input-bg: rgba(255,255,255,0.03);
+            --input-border: rgba(255,255,255,0.08);
+            --shadow: 0 8px 20px rgba(2,6,23,0.6);
+        }
+
+        html, body {
+            height: 100%;
+        }
+
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f0f4f8;
+            background-color: var(--bg);
+            color: var(--text);
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
+            transition: background-color 0.25s ease, color 0.25s ease;
         }
 
         h1 {
-            color: #333;
-            font-size: 2.5rem;
+            color: var(--text);
+            font-size: 2rem;
             margin-bottom: 20px;
         }
 
         .container {
-            background-color: white;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            background-color: var(--card-bg);
+            padding: 32px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
             text-align: center;
-            max-width: 400px;
+            max-width: 480px;
             width: 100%;
+            position: relative;
         }
 
         form {
             display: flex;
             flex-direction: column;
             align-items: center;
-        }
-
-        input[type="file"] {
-            margin-bottom: 20px;
+            gap: 16px;
         }
 
         input[type="submit"] {
-            background-color: #4CAF50;
+            background-color: var(--accent);
             color: white;
             border: none;
             padding: 10px 20px;
             font-size: 1rem;
             cursor: pointer;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
+            border-radius: 6px;
+            transition: background-color 0.2s ease;
         }
 
         input[type="submit"]:hover {
-            background-color: #45a049;
+            filter: brightness(0.95);
         }
 
         input[type="file"] {
-            padding: 10px;
-            border-radius: 5px;
-            background-color: #e8f0fe;
+            padding: 12px;
+            border-radius: 8px;
+            background-color: var(--input-bg);
             cursor: pointer;
-            border: 2px dashed #90caf9;
+            border: 2px dashed var(--input-border);
             width: 100%;
             text-align: center;
-            color: #666;
+            color: var(--muted);
             font-size: 1rem;
             outline: none;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
         }
 
         input[type="file"]:hover {
-            background-color: #e3f2fd;
+            filter: brightness(1.03);
         }
 
         footer {
-            margin-top: 20px;
+            margin-top: 18px;
             font-size: 0.9rem;
-            color: #777;
+            color: var(--muted);
         }
+
+        /* Theme toggle switch */
+        .theme-toggle {
+            position: absolute;
+            right: 12px;
+            top: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 26px;
+        }
+
+        .switch input { display:none; }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0,0,0,0.15);
+            border-radius: 26px;
+            transition: background-color 0.2s ease;
+            overflow: visible;
+        }
+
+        /* icons inside the slider */
+        .slider .icon {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 14px;
+            height: 14px;
+            opacity: 0;
+            transition: opacity 0.18s ease, transform 0.18s ease;
+            pointer-events: none;
+        }
+
+        .slider .sun { left: 8px; }
+        .slider .moon { right: 8px; }
+
+        .slider:before {
+            content: "";
+            position: absolute;
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            top: 3px;
+            background-color: white;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .switch input:checked + .slider {
+            background-color: var(--accent);
+        }
+
+        .switch input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Show moon when checked (dark), show sun when unchecked (light) */
+        .switch input:checked + .slider .moon { opacity: 1; transform: translateY(-50%) scale(1); }
+        .switch input:checked + .slider .sun { opacity: 0; transform: translateY(-50%) scale(0.9); }
+
+        .switch input:not(:checked) + .slider .sun { opacity: 1; transform: translateY(-50%) scale(1); }
+        .switch input:not(:checked) + .slider .moon { opacity: 0; transform: translateY(-50%) scale(0.9); }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="theme-toggle" title="Toggle dark/light">
+            <label class="switch">
+                <input type="checkbox" id="theme-switch" aria-label="Toggle theme">
+                <span class="slider">
+                    <!-- Sun icon (light) -->
+                    <svg class="icon sun" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <circle cx="12" cy="12" r="4" fill="currentColor" />
+                        <g stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+                            <line x1="12" y1="1" x2="12" y2="3" />
+                            <line x1="12" y1="21" x2="12" y2="23" />
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                            <line x1="1" y1="12" x2="3" y2="12" />
+                            <line x1="21" y1="12" x2="23" y2="12" />
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                        </g>
+                    </svg>
+
+                    <!-- Moon icon (dark) -->
+                    <svg class="icon moon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" fill="currentColor" />
+                    </svg>
+                </span>
+            </label>
+        </div>
+
         <h1>Image Background Remover</h1>
         <form enctype="multipart/form-data" action="/process" method="post">
-            <input type="file" name="images" multiple accept=".jpg,.png" required>
+            <input type="file" name="images" multiple accept=".jpg,.jpeg,.png,.webp,.bmp,.tiff" required>
             <input type="submit" value="Remove Background">
         </form>
         <footer>
             <p>&copy; 2024 Bambietta | BGREMOVE</p>
         </footer>
+
+        <!-- Loading overlay -->
+        <div id="loading-overlay" style="display:none;">
+            <div class="loader-card">
+                <div class="spinner" aria-hidden="true"></div>
+                <div class="loader-text">Processing images&hellip; This may take a few seconds.</div>
+            </div>
+        </div>
+
+        <!-- Error toast -->
+        <div id="error-toast" role="alert" style="display:none;"></div>
     </div>
+
+    <style>
+        /* Loading overlay styles */
+        #loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(2,6,23,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .loader-card {
+            background: var(--card-bg);
+            color: var(--text);
+            padding: 20px 24px;
+            border-radius: 10px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            box-shadow: var(--shadow);
+            min-width: 260px;
+        }
+
+        .spinner {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 4px solid rgba(0,0,0,0.08);
+            border-top-color: var(--accent);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loader-text { font-size: 0.95rem; color: var(--muted); }
+
+        /* Error toast */
+        #error-toast {
+            position: fixed;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            background: #ff4d4f;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+            z-index: 10000;
+            max-width: 90%;
+            font-weight: 600;
+        }
+    </style>
+
+    <script>
+        (function() {
+            const themeKey = 'theme';
+            const switchEl = document.getElementById('theme-switch');
+            const root = document.documentElement;
+
+            // Default to dark theme when nothing is stored
+            const stored = localStorage.getItem(themeKey);
+            const defaultIsDark = true;
+            const isDark = stored ? (stored === 'dark') : defaultIsDark;
+
+            function applyTheme(dark) {
+                root.setAttribute('data-theme', dark ? 'dark' : 'light');
+                if (switchEl) switchEl.checked = dark;
+            }
+
+            applyTheme(isDark);
+
+            if (switchEl) {
+                switchEl.addEventListener('change', function() {
+                    const dark = this.checked;
+                    applyTheme(dark);
+                    localStorage.setItem(themeKey, dark ? 'dark' : 'light');
+                });
+            }
+
+            // --- Form submission with loading overlay and error handling ---
+            const form = document.querySelector('form');
+            const overlay = document.getElementById('loading-overlay');
+            const errorToast = document.getElementById('error-toast');
+            const submitBtn = form.querySelector('input[type="submit"]');
+
+            function showOverlay() {
+                if (overlay) overlay.style.display = 'flex';
+                if (submitBtn) submitBtn.disabled = true;
+            }
+
+            function hideOverlay() {
+                if (overlay) overlay.style.display = 'none';
+                if (submitBtn) submitBtn.disabled = false;
+            }
+
+            function showError(msg) {
+                if (!errorToast) return;
+                errorToast.textContent = msg || 'An error occurred while processing images.';
+                errorToast.style.display = 'block';
+                setTimeout(() => { errorToast.style.display = 'none'; }, 6000);
+            }
+
+            if (form) {
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    // gather files
+                    const files = form.querySelector('input[type=file]').files;
+                    if (!files || files.length === 0) {
+                        showError('Please select at least one image.');
+                        return;
+                    }
+
+                    showOverlay();
+
+                    try {
+                        const fd = new FormData(form);
+
+                        const resp = await fetch(form.action || '/process', {
+                            method: 'POST',
+                            headers: {
+                                // tell server this is an XHR/fetch request so it can return JSON errors
+                                'X-Requested-With': 'XMLHttpRequest',
+                                // prefer zip but allow json error responses
+                                'Accept': 'application/zip, application/json, */*'
+                            },
+                            body: fd
+                        });
+
+                        if (!resp.ok) {
+                            // prefer JSON error, fall back to text
+                            let errMsg = `Server returned status ${resp.status}`;
+                            const ctype = resp.headers.get('Content-Type') || '';
+                            try {
+                                if (ctype.includes('application/json')) {
+                                    const j = await resp.json();
+                                    if (j && j.error) errMsg = j.error;
+                                } else {
+                                    const txt = await resp.text();
+                                    // strip tags if HTML returned
+                                    errMsg = txt.replace(/<[^>]*>/g, '').trim() || errMsg;
+                                }
+                            } catch (e) {
+                                // ignore parse errors
+                            }
+                            showError(errMsg);
+                            hideOverlay();
+                            return;
+                        }
+
+                        const blob = await resp.blob();
+                        const contentType = resp.headers.get('Content-Type') || '';
+
+                        if (!contentType.includes('zip') && blob.size > 0) {
+                            // Possibly a JSON error or plain text
+                            let errMsg = 'Unexpected server response';
+                            try {
+                                // try to parse as text first then JSON
+                                const txt = await blob.text();
+                                // If server returned JSON text, try to parse
+                                try {
+                                    const j = JSON.parse(txt);
+                                    if (j && j.error) errMsg = j.error;
+                                    else errMsg = txt.replace(/<[^>]*>/g, '').trim() || errMsg;
+                                } catch (_) {
+                                    errMsg = txt.replace(/<[^>]*>/g, '').trim() || errMsg;
+                                }
+                            } catch (e) {
+                                // ignore
+                            }
+                            showError(errMsg);
+                            hideOverlay();
+                            return;
+                        }
+
+                        // Create a download link for the returned zip
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'processed_images.zip';
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                        window.URL.revokeObjectURL(url);
+
+                    } catch (err) {
+                        console.error('Upload/processing error', err);
+                        showError(err && err.message ? err.message : 'Network error during upload');
+                    } finally {
+                        hideOverlay();
+                    }
+                });
+            }
+        })();
+    </script>
 </body>
 </html>
