@@ -1,1 +1,1 @@
-[bamover.site](url)
+[bamover.site](link)
